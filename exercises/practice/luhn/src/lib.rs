@@ -8,7 +8,6 @@ pub fn is_valid(code: &str) -> bool {
 
     for ch in cleaned_code.chars() {
         match ch {
-            ' ' => continue,
             '0'..='9' => {
                 if j%2 == 0 {
                     doubling = ch.to_digit(10).unwrap() * 2;
