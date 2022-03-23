@@ -1,5 +1,6 @@
 use clap::Parser;
 use luhn::*;
+use regex::Regex;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -11,5 +12,13 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    println!("Card: {0} is {1}", args.code, is_valid(&args.code));
+
+    if !Regex::new(r"((\d{4}) ){3}\d{4}").unwrap().is_match(&args.code) {
+        println!("Invalid \
+    format: 1234 5678 1234 5678")
+    } else if is_valid(&args.code) {
+        println!("Card is valid");
+    } else {
+        println!("Card is invalid");
+    }
 }
