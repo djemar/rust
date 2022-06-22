@@ -7,8 +7,8 @@ pub struct CircularBuffer<T> {
     // import.
     //field: PhantomData<T>,
     data: Vec<Option<T>>,
-    read_index: usize,
-    write_index: usize,
+    head: usize,
+    tail: usize,
 
 }
 
@@ -23,40 +23,40 @@ impl<T: Clone> CircularBuffer<T> {
     pub fn new(capacity: usize) -> Self {
         CircularBuffer {
             data: vec![None; capacity],
-            read_index: 0,
-            write_index: 0
+            head: 0,
+            tail: 0
         }
     }
 
     pub fn write(&mut self, _element: T) -> Result<(), Error> {
-        if self.data[self.write_index].is_some() {
+        if self.data[self.tail].is_some() {
             return Err(Error::FullBuffer)
         }
-        self.data[self.write_index] = Some(_element);
-        self.write_index = self.increase_index(self.write_index);
+        self.data[self.tail] = Some(_element);
+        self.tail = self.increase_index(self.tail);
         Ok(())
     }
 
     pub fn read(&mut self) -> Result<T, Error> {
-        self.data[self.read_index].take().ok_or(Error::EmptyBuffer)
+        self.data[self.head].take().ok_or(Error::EmptyBuffer)
             .map(|value|{
-                self.read_index = self.increase_index(self.read_index);
+                self.head = self.increase_index(self.head);
                 value
             })
     }
 
     pub fn clear(&mut self) {
-        self.read_index = 0;
-        self.write_index = 0;
+        self.head = 0;
+        self.tail = 0;
         self.data.fill(None);
     }
 
     pub fn overwrite(&mut self, _element: T) {
-        if self.data[self.write_index].is_some() {
-            self.read_index = self.increase_index(self.read_index);
+        if self.data[self.tail].is_some() {
+            self.head = self.increase_index(self.head);
         }
-        self.data[self.write_index] = Some(_element);
-        self.write_index = self.increase_index(self.write_index);
+        self.data[self.tail] = Some(_element);
+        self.tail = self.increase_index(self.tail);
     }
 
     fn increase_index(&mut self, index: usize) -> usize {
